@@ -1,0 +1,19 @@
+{
+  "name": "sendToLight",
+  "version": "0.0.1",
+  "description": "ERROR: No README.md file found!",
+  "main": "server.js",
+  "dependencies": {
+    "noble": "~0.3.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node sendToLight.js"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "subdomain": "jlinnega",
+  "engines": {
+    "node": "0.10.x"
+  }
+}
