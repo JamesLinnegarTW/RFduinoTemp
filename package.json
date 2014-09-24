@@ -15,5 +15,8 @@
   "subdomain": "jlinnega",
   "engines": {
     "node": "0.10.x"
+  },
+  "devDependencies": {
+    "underscore": "~1.7.0"
   }
 }
