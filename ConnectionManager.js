@@ -1,14 +1,14 @@
-function ConnectionManager(lightRepo){
+function ConnectionManager(deviceRepo){
 
   var noble = require('noble');
-  var Light = require('./Light');
+  var Device = require('./Device');
 
   function stateChangeHandler(state) {
     if (state === 'poweredOn') {
       noble.startScanning(['2220']); // don't allow duplicates
       console.log('scanning');
     } else {
-      lightRepo.clearAll();
+      deviceRepo.clearAll();
       noble.stopScanning();
       console.log("stop scanning");
     }
@@ -16,14 +16,16 @@ function ConnectionManager(lightRepo){
 
 
   function discoveryHandler(peripheral) {
-    var light;
+    var device;
     var retryInterval;
 
+    console.log('peripheral discovered (' + peripheral.uuid+ '):');
+    console.log('\thello my local name is:');
+    console.log('\t\t' + peripheral.advertisement.localName);
 
-    if (peripheral.advertisement.localName == 'BuildLight') {
+    if (peripheral.advertisement.localName == 'RFduino') {
 
       function connect() {
-	clearInterval(retryInterval);
         console.log('connecting to ' + peripheral.advertisement.localName);
         peripheral.connect(function(error) {
 
@@ -34,6 +36,7 @@ function ConnectionManager(lightRepo){
       };
 
       function connectionHandler(){
+        clearInterval(retryInterval);
         console.log('connected to ' + peripheral.advertisement.localName);
         console.log('discovering services');
         peripheral.discoverServices(['2220']);
@@ -41,8 +44,9 @@ function ConnectionManager(lightRepo){
 
       function disconnectHandler(){
         console.log('disconnected peripheral ' + peripheral.advertisement.localName);
-        lightRepo.removeLight(peripheral);
-        retryInterval = setInterval(connect, 10000);
+        //deviceRepo.removeDevice(peripheral);
+        if(!retryInterval)
+          retryInterval = setInterval(connect, 15000);
       }
 
       function servicesHandler(services) {
@@ -53,11 +57,9 @@ function ConnectionManager(lightRepo){
 
       function characteristicsHandler(characteristics){
         console.log('registering read handler');
-        light.registerReadHandler(characteristics[0]);
+        device.registerReadHandler(characteristics[0]);
         console.log('registering write handler');
-        light.registerWriteHandler(characteristics[1])
-        console.log('sending reset');
-        light.sendReset();
+        device.registerWriteHandler(characteristics[1])
       }
 
       peripheral.on('connect', connectionHandler);
@@ -66,13 +68,13 @@ function ConnectionManager(lightRepo){
 
 
 
-      light = new Light(peripheral);
+      device = new Device(peripheral);
 
-      light.registerDisconnectHandler(function(){
+      device.registerDisconnectHandler(function(){
         peripheral.disconnect();
       });
 
-      lightRepo.add(light);
+      deviceRepo.add(device);
       connect();
     }
   }
